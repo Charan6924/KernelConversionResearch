@@ -66,7 +66,7 @@ The model is trained with a combination of:
 
 ### Loss Curves
 
-![Loss Curves](training_filter_model/visualization/loss_curves.png)
+![Loss Curves](loss_curves.png)
 
 *Training progress over 100 epochs. Left: Validation total loss showing steady convergence. Right: Reconstruction loss for both training and validation sets.*
 
@@ -76,7 +76,7 @@ The model is trained with a combination of:
 
 The model learns to predict smooth filter profiles that match the ground truth frequency response:
 
-![Filter Comparison](training_filter_model/visualization/filter_epoch_050.png)
+![Filter Comparison](filter_epoch_050.png)
 
 *Comparison of predicted vs real filter profiles at epoch 50. Top row: Smooth-to-Sharp (S2SH) filters. Bottom row: Sharp-to-Smooth (SH2S) filters.*
 
@@ -84,7 +84,7 @@ The model learns to predict smooth filter profiles that match the ground truth f
 
 Generated images closely match the target reconstructions:
 
-![Image Reconstruction](training_filter_model/visualization/images_epoch_050.png)
+![Image Reconstruction](images_epoch_050.png)
 
 *Image reconstruction results at epoch 50. Top: Input smooth and sharp images. Bottom: Generated sharp and smooth images using predicted filters.*
 
