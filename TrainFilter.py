@@ -155,6 +155,133 @@ def plot_images(I_smooth, I_sharp, I_gen_sharp, I_gen_smooth, epoch, output_dir)
     plt.close()
 
 
+def plot_epoch_summary(vis_data, epoch, output_dir):
+    """
+    Comprehensive epoch plot showing:
+    1. Predicted OTF slices at row 255
+    2. Generated images
+    3. Filter splines (2D filter visualizations)
+    """
+    pred_s2sh = vis_data['pred_s2sh']
+    pred_sh2s = vis_data['pred_sh2s']
+    real_s2sh = vis_data['real_s2sh']
+    real_sh2s = vis_data['real_sh2s']
+    I_smooth = vis_data['I_smooth']
+    I_sharp = vis_data['I_sharp']
+    I_gen_sharp = vis_data['I_gen_sharp']
+    I_gen_smooth = vis_data['I_gen_smooth']
+
+    fig = plt.figure(figsize=(20, 16))
+
+    # Row 1: Predicted OTF slices at row 255
+    # otf_smooth2sharp[0, 0, 255, :] -> pred_s2sh[0, 255, :]
+    ax1 = fig.add_subplot(3, 4, 1)
+    otf_s2sh_slice = pred_s2sh[0, 255, :].cpu().numpy()
+    ax1.plot(otf_s2sh_slice, 'b-', linewidth=1.5, label='Predicted')
+    ax1.plot(real_s2sh[0, 255, :].cpu().numpy(), 'r--', linewidth=1.5, alpha=0.7, label='Real')
+    ax1.set_title('OTF smooth2sharp[0, 255, :]')
+    ax1.set_xlabel('Frequency')
+    ax1.set_ylabel('Magnitude')
+    ax1.legend()
+    ax1.set_ylim([0, 5])
+    ax1.grid(True, alpha=0.3)
+
+    # otf_sharp2smooth[0, 0, 255, :] -> pred_sh2s[0, 255, :]
+    ax2 = fig.add_subplot(3, 4, 2)
+    otf_sh2s_slice = pred_sh2s[0, 255, :].cpu().numpy()
+    ax2.plot(otf_sh2s_slice, 'b-', linewidth=1.5, label='Predicted')
+    ax2.plot(real_sh2s[0, 255, :].cpu().numpy(), 'r--', linewidth=1.5, alpha=0.7, label='Real')
+    ax2.set_title('OTF sharp2smooth[0, 255, :]')
+    ax2.set_xlabel('Frequency')
+    ax2.set_ylabel('Magnitude')
+    ax2.legend()
+    ax2.set_ylim([0, 2])
+    ax2.grid(True, alpha=0.3)
+
+    # Row 1 continued: 2D filter heatmaps (splines visualization)
+    ax3 = fig.add_subplot(3, 4, 3)
+    im3 = ax3.imshow(pred_s2sh[0].cpu().numpy(), cmap='viridis', aspect='auto', vmin=0, vmax=3)
+    ax3.set_title('Predicted S2SH Filter (2D)')
+    ax3.set_xlabel('Frequency X')
+    ax3.set_ylabel('Frequency Y')
+    plt.colorbar(im3, ax=ax3)
+
+    ax4 = fig.add_subplot(3, 4, 4)
+    im4 = ax4.imshow(pred_sh2s[0].cpu().numpy(), cmap='viridis', aspect='auto', vmin=0, vmax=1.5)
+    ax4.set_title('Predicted SH2S Filter (2D)')
+    ax4.set_xlabel('Frequency X')
+    ax4.set_ylabel('Frequency Y')
+    plt.colorbar(im4, ax=ax4)
+
+    # Row 2: Generated Images
+    ax5 = fig.add_subplot(3, 4, 5)
+    ax5.imshow(I_smooth[0, 0].cpu().numpy(), cmap='gray', vmin=0, vmax=1)
+    ax5.set_title('Input Smooth')
+    ax5.axis('off')
+
+    ax6 = fig.add_subplot(3, 4, 6)
+    ax6.imshow(I_sharp[0, 0].cpu().numpy(), cmap='gray', vmin=0, vmax=1)
+    ax6.set_title('Input Sharp')
+    ax6.axis('off')
+
+    ax7 = fig.add_subplot(3, 4, 7)
+    ax7.imshow(I_gen_sharp[0, 0].cpu().numpy(), cmap='gray', vmin=0, vmax=1)
+    ax7.set_title('Generated Sharp (from Smooth)')
+    ax7.axis('off')
+
+    ax8 = fig.add_subplot(3, 4, 8)
+    ax8.imshow(I_gen_smooth[0, 0].cpu().numpy(), cmap='gray', vmin=0, vmax=1)
+    ax8.set_title('Generated Smooth (from Sharp)')
+    ax8.axis('off')
+
+    # Row 3: Filter splines (radial profiles and center column)
+    # Radial profile from center
+    center = pred_s2sh.shape[-1] // 2
+    ax9 = fig.add_subplot(3, 4, 9)
+    # Center row profile
+    ax9.plot(pred_s2sh[0, center, :].cpu().numpy(), 'b-', linewidth=1.5, label='Pred Row 256')
+    ax9.plot(real_s2sh[0, center, :].cpu().numpy(), 'r--', linewidth=1.5, alpha=0.7, label='Real Row 256')
+    # Center column profile
+    ax9.plot(pred_s2sh[0, :, center].cpu().numpy(), 'g-', linewidth=1.5, alpha=0.7, label='Pred Col 256')
+    ax9.set_title('S2SH Spline Profiles')
+    ax9.set_xlabel('Index')
+    ax9.set_ylabel('Magnitude')
+    ax9.legend()
+    ax9.set_ylim([0, 5])
+    ax9.grid(True, alpha=0.3)
+
+    ax10 = fig.add_subplot(3, 4, 10)
+    ax10.plot(pred_sh2s[0, center, :].cpu().numpy(), 'b-', linewidth=1.5, label='Pred Row 256')
+    ax10.plot(real_sh2s[0, center, :].cpu().numpy(), 'r--', linewidth=1.5, alpha=0.7, label='Real Row 256')
+    ax10.plot(pred_sh2s[0, :, center].cpu().numpy(), 'g-', linewidth=1.5, alpha=0.7, label='Pred Col 256')
+    ax10.set_title('SH2S Spline Profiles')
+    ax10.set_xlabel('Index')
+    ax10.set_ylabel('Magnitude')
+    ax10.legend()
+    ax10.set_ylim([0, 2])
+    ax10.grid(True, alpha=0.3)
+
+    # Difference images
+    ax11 = fig.add_subplot(3, 4, 11)
+    diff_sharp = torch.abs(I_gen_sharp - I_sharp)[0, 0].cpu().numpy()
+    im11 = ax11.imshow(diff_sharp, cmap='hot', vmin=0, vmax=0.3)
+    ax11.set_title('|Gen Sharp - Real Sharp|')
+    ax11.axis('off')
+    plt.colorbar(im11, ax=ax11)
+
+    ax12 = fig.add_subplot(3, 4, 12)
+    diff_smooth = torch.abs(I_gen_smooth - I_smooth)[0, 0].cpu().numpy()
+    im12 = ax12.imshow(diff_smooth, cmap='hot', vmin=0, vmax=0.3)
+    ax12.set_title('|Gen Smooth - Real Smooth|')
+    ax12.axis('off')
+    plt.colorbar(im12, ax=ax12)
+
+    plt.suptitle(f'Epoch {epoch} Summary', fontsize=16, fontweight='bold')
+    plt.tight_layout()
+    plt.savefig(output_dir / f'epoch_{epoch:03d}_summary.png', dpi=150)
+    plt.close()
+
+
 def train_one_epoch(model, dataloader, optimizer, scaler, device, epoch):
     model.train()
     total_loss = 0
@@ -356,6 +483,8 @@ def main():
                 vis_data['I_gen_sharp'], vis_data['I_gen_smooth'],
                 epoch, vis_dir
             )
+            # Comprehensive epoch summary plot
+            plot_epoch_summary(vis_data, epoch, vis_dir)
 
         # Save checkpoint
         is_best = val_stats['total_loss'] < best_val
