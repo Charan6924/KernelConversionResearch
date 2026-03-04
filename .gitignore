@@ -8,3 +8,8 @@ wheels/
 
 # Virtual environments
 .venv
+
+testA/
+testB/
+
+training_filter_model/

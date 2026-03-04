@@ -1,7 +1,3 @@
-"""
-Reconstruct volumes using the direct FilterEstimator model.
-Takes NIfTI slices and outputs the filter ratio + reconstructed images.
-"""
 import numpy as np
 import nibabel as nib
 import torch
